@@ -13,6 +13,8 @@ password = None
 
 @app.route('/')
 def index():
+    global username
+
     context = {
         'title': 'Servidor Flask',
         'version': '0.0.0'
@@ -39,7 +41,7 @@ def login():
         else:
             return render_template('login.html', error='Credenciais inválidas.')
         
-    return render_template('login.html')
+    return render_template('login.html') # GET
     
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -48,10 +50,14 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+        confirmation = request.form.get('confirmation')
+
+        if password != confirmation:
+            return render_template('register.html', error='As senhas são coincidem.')
 
         return redirect(url_for('login'))
 
-    return render_template('register.html')
+    return render_template('register.html') # GET
 
 if __name__ == '__main__':
     app.run(debug=True)
