@@ -10,7 +10,7 @@
 
     <body class="d-flex flex-column justify-content-center align-items-center bg-light text-dark vh-100 m-0">
         <main class="container d-flex flex-column justify-content-center align-items-center h-100">
-            <h1>Login</h1>
+            <h1 class="fw-bold mb-4">Login</h1>
 
             {% if error %}
             <p class="alert alert-danger">{{ error }}</p>
@@ -31,6 +31,8 @@
                     <button class="btn btn-primary" type="submit">Entrar</button>
                 </div>
             </form>
+
+            <a class="link-dark mt-4" href="/register">Cadastro</a>
         </main>
 
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>

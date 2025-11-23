@@ -30,6 +30,9 @@ def index():
 def login():
     global username, password
 
+    if 'user' in session:
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
         user = request.form.get('username')
         pswd = request.form.get('password')
@@ -47,6 +50,9 @@ def login():
 def register():
     global username, password
 
+    if 'user' in session:
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -58,6 +64,12 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html') # GET
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)
