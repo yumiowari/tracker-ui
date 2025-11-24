@@ -21,7 +21,7 @@ def init_db():
         '''
         CREATE TABLE IF NOT EXISTS tracker (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
+            name TEXT UNIQUE,
             lat REAL NOT NULL,
             lng REAL NOT NULL
         );

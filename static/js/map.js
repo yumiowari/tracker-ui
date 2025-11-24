@@ -9,8 +9,11 @@ function refreshTrackers(map){
         .then(trackers => {
 
             trackers.forEach(t => {
+                // usa o name como identificador
+                const key = t.name
+
                 // se o marcador ainda não existe, cria.
-                if(!trackerMarkers[t.id]){
+                if(!trackerMarkers[key]){
                     const marker = new google.maps.Marker({
                         position: { lat: t.lat, lng: t.lng },
                         map: map,
@@ -31,11 +34,11 @@ function refreshTrackers(map){
                         infoWindow.open(map, marker);
                     });
 
-                    trackerMarkers[t.id] = marker;
+                    trackerMarkers[key] = marker;
                 } else {
                     // se já existe, só atualiza posição e título
-                    trackerMarkers[t.id].setPosition({ lat: t.lat, lng: t.lng });
-                    trackerMarkers[t.id].setTitle(t.name);
+                    trackerMarkers[key].setPosition({ lat: t.lat, lng: t.lng });
+                    trackerMarkers[key].setTitle(t.name);
                 }
             });
         });
@@ -173,6 +176,6 @@ function initMap() {
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
 
-        console.log(`Latitude: ${lat}\n Longitude: ${lng}`);
+        console.log(`Latitude: ${lat}\nLongitude: ${lng}`);
     });
 }
