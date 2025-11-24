@@ -2,7 +2,10 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from dotenv import load_dotenv
 import os
 
-from db import init_db, get_user, insert_user
+from db import init_db
+from db import get_user, insert_user
+from db import insert_coords, get_coords, update_coords, delete_coords
+from db import load_trackers
 
 app = Flask(__name__)
 
@@ -20,7 +23,8 @@ def index():
     
     context = {
         'title': 'Servidor Flask',
-        'version': '0.0.0'
+        'version': '0.0.0',
+        'maps_key': os.getenv('GOOGLE_MAPS_KEY')
     }
 
     return render_template('index.html', **context)
@@ -73,11 +77,63 @@ def register():
 
     return render_template('register.html') # GET
 
-@app.route('/logout', methods=['POST'])
+@app.post('/logout')
 def logout():
     session.clear()
 
     return redirect(url_for('index'))
+
+@app.get('/coords/<string:name>')
+def coords(name):
+    data = get_coords(name)
+
+    if data is None:
+        return {'error': 'Rastreador não encontrado'}, 404
+    
+    return data
+
+
+@app.post('/create')
+def create():
+    body = request.get_json()
+
+    name = body.get('name')
+    lat = body.get('lat')
+    lng = body.get('lng')
+
+    if not name or lat is None or lng is None:
+        return {'error': 'Dados incompletos.'}, 400
+
+    insert_coords(name, lat, lng)
+
+    return {'status': 'criado'}
+
+
+@app.post('/update/<string:name>')
+def update(name):
+    body = request.get_json()
+
+    if 'lat' not in body or 'lng' not in body:
+        return {'error': 'Latitude e longitude são obrigatórias.'}, 400
+
+    update_coords(name, body['lat'], body['lng'])
+
+    return {'status': 'ok'}
+
+
+@app.delete('/delete/<string:name>')
+def delete(name):
+    delete_coords(name)
+
+    return {'status': 'removido'}
+
+@app.get('/trackers')
+def trackers():
+    data = load_trackers()
+
+    print(data)
+
+    return data
 
 if __name__ == '__main__':
     app.run(debug=True)
