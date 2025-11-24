@@ -22,9 +22,10 @@ def index():
         return redirect(url_for('login'))
     
     context = {
-        'title': 'Servidor Flask',
+        'title': 'ProtecTI',
         'version': '0.0.0',
-        'maps_key': os.getenv('GOOGLE_MAPS_KEY')
+        'maps_key': os.getenv('GOOGLE_MAPS_KEY'),
+        'username': session['username']
     }
 
     return render_template('index.html', **context)
@@ -34,8 +35,10 @@ def login():
     if 'username' in session:
         return redirect(url_for('index'))
 
-    if 'user' in session:
-        return redirect(url_for('index'))
+    context = {
+        'title': 'ProtecTI',
+        'version': '0.0.0'
+    }
 
     if request.method == 'POST':
         username = request.form.get('username')
@@ -48,17 +51,21 @@ def login():
 
             return redirect(url_for('index'))
         else:
-            return render_template('login.html', error='Credenciais inválidas.')
+            context['error'] = 'Credenciais inválidas.'
+
+            return render_template('login.html', **context)
         
-    return render_template('login.html') # GET
+    return render_template('login.html', **context) # GET
     
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if 'username' in session:
         return redirect(url_for('index'))
 
-    if 'user' in session:
-        return redirect(url_for('index'))
+    context = {
+        'title': 'ProtecTI',
+        'version': '0.0.0'
+    }
 
     if request.method == 'POST':
         username = request.form.get('username')
@@ -66,16 +73,20 @@ def register():
         confirmation = request.form.get('confirmation')
 
         if password != confirmation:
-            return render_template('register.html', error='As senhas são coincidem.')
+            context['error'] = 'As senhas são coincidem.'
+
+            return render_template('register.html', **context)
         
         try:
             insert_user(username, password)
         except Exception:
-            return render_template('register.html', error=f'"{username}" não está disponível.')
+            context['error'] = f'"{username}" não está disponível.'
+
+            return render_template('register.html', **context)
 
         return redirect(url_for('login'))
 
-    return render_template('register.html') # GET
+    return render_template('register.html', **context) # GET
 
 @app.post('/logout')
 def logout():
@@ -106,7 +117,7 @@ def create():
 
     insert_coords(name, lat, lng)
 
-    return {'status': 'criado'}
+    return {'status': 'ok'}
 
 
 @app.post('/update/<string:name>')
@@ -125,13 +136,11 @@ def update(name):
 def delete(name):
     delete_coords(name)
 
-    return {'status': 'removido'}
+    return {'status': 'ok'}
 
 @app.get('/trackers')
 def trackers():
     data = load_trackers()
-
-    print(data)
 
     return data
 
