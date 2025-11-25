@@ -99,14 +99,50 @@ window.MapApp = {
 
         this.infoWindow = new google.maps.InfoWindow();
 
+        // Tenta centralizar o mapa no usuário
+        if(navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(
+                // Sucesso na obtenção da localização
+                pos => {
+                    const userPos = {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude
+                    };
+
+                    // 1. Centraliza e aplica zoom na posição do usuário
+                    this.map.setCenter(userPos);
+                    this.map.setZoom(14); // Um zoom mais próximo para a posição do usuário
+
+                    // 2. Adiciona o marcador na posição do usuário
+                    new google.maps.Marker({
+                        position: userPos,
+                        map: this.map,
+                        icon: "/static/media/user.png"
+                    });
+                },
+                // Falha na obtenção da localização
+                () => {
+                    console.log("Não foi possível centralizar o mapa no usuário.");
+                }
+            );
+        }
+
         // primeira carga
         this.refreshTrackers();
 
         // recarregar periodicamente
         // setInterval(() => this.refreshTrackers(), 1000);
+
+        // Observa o clique do usuário para retornar a latitude e longitude no console
+        this.map.addListener("click", (event) => {
+            const lat = event.latLng.lat();
+            const lng = event.latLng.lng();
+
+            console.log(`Latitude: ${lat}\nLongitude: ${lng}`);
+        });
     },
     refreshTrackers: function(){
-        fetch("/trackers")
+        fetch("/tracker/list")
             .then(r => r.json())
             .then(trackers => {
                 trackers.forEach(t => {

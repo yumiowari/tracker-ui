@@ -23,7 +23,8 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE,
             lat REAL NOT NULL,
-            lng REAL NOT NULL
+            lng REAL NOT NULL,
+            status INTEGER DEFAULT 0
         );
         '''
     )
@@ -47,7 +48,7 @@ def insert_user(username, password):
 
     conn.close()
 
-def insert_coords(name, lat, lng):
+def insert_tracker(name, lat, lng):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute(
@@ -58,7 +59,7 @@ def insert_coords(name, lat, lng):
 
     con.close()
 
-def get_coords(name):
+def get_tracker_coords(name):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute('SELECT lat, lng FROM tracker WHERE name = ?', (name,))
@@ -72,7 +73,7 @@ def get_coords(name):
     lat, lng = row
     return {'lat': lat, 'lng': lng}
 
-def update_coords(name, lat, lng):
+def update_tracker_coords(name, lat, lng):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute(
@@ -83,7 +84,18 @@ def update_coords(name, lat, lng):
 
     con.close()
 
-def delete_coords(name):
+def update_tracker_status(name, status):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute(
+        'UPDATE tracker SET status = ? WHERE name = ?',
+        (status, name)
+    )
+    con.commit()
+
+    con.close()
+
+def delete_tracker(name):
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
     cur.execute("DELETE FROM tracker WHERE name = ?", (name,))
@@ -91,14 +103,14 @@ def delete_coords(name):
     
     con.close()
 
-def load_trackers():
+def list_trackers():
     con = sqlite3.connect(DB_PATH)
     cur = con.cursor()
-    cur.execute("SELECT name, lat, lng FROM tracker")
+    cur.execute("SELECT name, lat, lng, status FROM tracker")
     rows = cur.fetchall()
     con.close()
 
     return [
-        {"name": r[0], "lat": r[1], "lng": r[2]}
-        for r in rows
+        {"name": row[0], "lat": row[1], "lng": row[2], "status": row[3]}
+        for row in rows
     ]

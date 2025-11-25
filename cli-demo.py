@@ -6,9 +6,11 @@ while True:
     print("\n--- Rastreador ---")
     print("1. Criar rastreador")
     print("2. Atualizar coordenadas")
-    print("3. Ver coordenadas")
-    print("4. Deletar rastreador")
-    print("5. Sair")
+    print("3. Atualizar status")
+    print("4. Ver coordenadas")
+    print("5. Deletar rastreador")
+    print("6. Listar rastreadores")
+    print("\n0. Sair\n")
 
     op = input("Escolha: ").strip()
 
@@ -17,35 +19,49 @@ while True:
         lat = float(input("Latitude inicial: "))
         lng = float(input("Longitude inicial: "))
 
-        r = requests.post(f"{BASE}/create", json={
+        r = requests.post(f"{BASE}/tracker/create", json={
             "name": name,
             "lat": lat,
             "lng": lng
         })
-        print(r.json())
+        print(f"Resposta: {r.json()}")
 
     elif op == "2":
         name = input("Nome do rastreador: ").strip()
         lat = float(input("Nova latitude: "))
         lng = float(input("Nova longitude: "))
 
-        r = requests.post(f"{BASE}/update/{name}", json={
+        r = requests.post(f"{BASE}/tracker/update-coords/{name}", json={
             "lat": lat,
             "lng": lng
         })
-        print(r.json())
+        print(f"Resposta: {r.json()}")
 
     elif op == "3":
         name = input("Nome do rastreador: ").strip()
-        r = requests.get(f"{BASE}/coords/{name}")
-        print(r.json())
+        status = int(input("Novo status (1 - ativo; 0 - inativo): "))
+
+        r = requests.post(f"{BASE}/tracker/update-status/{name}", json={
+            "status": status
+        })
+        print(f"Resposta: {r.json()}")
 
     elif op == "4":
         name = input("Nome do rastreador: ").strip()
-        r = requests.delete(f"{BASE}/delete/{name}")
-        print(r.json())
+        r = requests.get(f"{BASE}/tracker/get-coords/{name}")
+        print(f"Resposta: {r.json()}")
 
     elif op == "5":
+        name = input("Nome do rastreador: ").strip()
+        r = requests.delete(f"{BASE}/tracker/delete/{name}")
+        print(f"Resposta: {r.json()}")
+
+    elif op == "6":
+        r = requests.get(f"{BASE}/tracker/list")
+        print("Rastreadores:")
+        print(r.json())
+
+    elif op == "0":
         break
 
     else:

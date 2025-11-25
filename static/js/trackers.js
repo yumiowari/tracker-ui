@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     function loadTrackerList(){
-        fetch('/trackers')
+        fetch('/tracker/list')
             .then(r => r.json())
             .then(trackers => {
                 const ul = document.getElementById('tracker-list');
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.style.cursor = 'pointer';
 
                     const dot = document.createElement('span');
-                    dot.className = `rounded-circle ${t.active ? 'bg-success' : 'bg-danger'}`;
+                    dot.className = `rounded-circle ${t.status ? 'bg-success' : 'bg-danger'}`;
                     dot.style.width = '10px';
                     dot.style.height = '10px';
                     dot.style.display = 'inline-block';
@@ -22,8 +22,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     name.className = 'fw-bold'
 
                     const status = document.createElement('span');
-                    status.textContent = t.active ? 'Ativo' : 'Inativo';
-                    status.className = `${t.active ? 'text-success' : 'text-danger'} ms-auto`;
+                    status.textContent = t.status ? 'Ativo' : 'Inativo';
+                    status.className = `${t.status ? 'text-success' : 'text-danger'} ms-auto`;
 
                     li.appendChild(dot);
                     li.appendChild(name);

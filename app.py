@@ -4,8 +4,8 @@ import os
 
 from db import init_db
 from db import get_user, insert_user
-from db import insert_coords, get_coords, update_coords, delete_coords
-from db import load_trackers
+from db import insert_tracker, get_tracker_coords, update_tracker_coords, update_tracker_status, delete_tracker
+from db import list_trackers
 
 app = Flask(__name__)
 
@@ -94,18 +94,17 @@ def logout():
 
     return redirect(url_for('index'))
 
-@app.get('/coords/<string:name>')
-def coords(name):
-    data = get_coords(name)
+@app.get('/tracker/get-coords/<string:name>')
+def route_get_tracker_coords(name):
+    data = get_tracker_coords(name)
 
     if data is None:
         return {'error': 'Rastreador não encontrado'}, 404
     
     return data
 
-
-@app.post('/create')
-def create():
+@app.post('/tracker/create')
+def route_create_tracker():
     body = request.get_json()
 
     name = body.get('name')
@@ -115,34 +114,41 @@ def create():
     if not name or lat is None or lng is None:
         return {'error': 'Dados incompletos.'}, 400
 
-    insert_coords(name, lat, lng)
+    insert_tracker(name, lat, lng)
 
     return {'status': 'ok'}
 
-
-@app.post('/update/<string:name>')
-def update(name):
+@app.post('/tracker/update-coords/<string:name>')
+def route_update_tracker_coords(name):
     body = request.get_json()
 
     if 'lat' not in body or 'lng' not in body:
-        return {'error': 'Latitude e longitude são obrigatórias.'}, 400
+        return {'error': '"Latitude" e longitude devem ser informadas.'}, 400
 
-    update_coords(name, body['lat'], body['lng'])
-
-    return {'status': 'ok'}
-
-
-@app.delete('/delete/<string:name>')
-def delete(name):
-    delete_coords(name)
+    update_tracker_coords(name, body['lat'], body['lng'])
 
     return {'status': 'ok'}
 
-@app.get('/trackers')
-def trackers():
-    data = load_trackers()
+@app.post('/tracker/update-status/<string:name>')
+def route_update_tracker_status(name):
+    body = request.get_json()
 
-    return data
+    if 'status' not in body:
+        return {'error': '"Status" deve ser informado.'}, 400
+    
+    update_tracker_status(name, body['status'])
+
+    return {'status': 'ok'}
+
+@app.delete('/tracker/delete/<string:name>')
+def route_delete_tracker(name):
+    delete_tracker(name)
+
+    return {'status': 'ok'}
+
+@app.get('/tracker/list')
+def route_list_trackers():
+    return list_trackers()
 
 if __name__ == '__main__':
     app.run(debug=True)
