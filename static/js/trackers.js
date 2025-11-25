@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    function loadTrackerList() {
+    function loadTrackerList(){
         fetch('/trackers')
             .then(r => r.json())
             .then(trackers => {
@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 trackers.forEach(t => {
                     const li = document.createElement('li');
-                    li.className = 'list-group-item d-flex align-items-center gap-2';
+                    li.className = 'list-group-item d-flex align-items-center gap-4';
+                    li.style.cursor = 'pointer';
 
                     const dot = document.createElement('span');
                     dot.className = `rounded-circle ${t.active ? 'bg-success' : 'bg-danger'}`;
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const name = document.createElement('span');
                     name.textContent = t.name;
-                    name.style.fontWeight = '600';
+                    name.className = 'fw-bold'
 
                     const status = document.createElement('span');
                     status.textContent = t.active ? 'Ativo' : 'Inativo';
@@ -28,11 +29,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     li.appendChild(name);
                     li.appendChild(status);
 
+                    li.addEventListener('click', () => {
+                        const marker = window.MapApp.trackerMarkers[t.name];
+                        if(marker){
+                            window.MapApp.map.setCenter(marker.getPosition());
+                            window.MapApp.map.setZoom(16);
+                        }
+                    });
+
                     ul.appendChild(li);
                 });
-            })
-            .catch(err => {
-                console.error('Erro ao carregar os rastreadores:', err);
             });
     }
 

@@ -1,49 +1,3 @@
-let map;
-const trackerMarkers = {};
-let infoWindow;
-
-// rotina de atualização dos marcadores
-function refreshTrackers(map){
-    fetch("/trackers")
-        .then(r => r.json())
-        .then(trackers => {
-
-            trackers.forEach(t => {
-                // usa o name como identificador
-                const key = t.name
-
-                // se o marcador ainda não existe, cria.
-                if(!trackerMarkers[key]){
-                    const marker = new google.maps.Marker({
-                        position: { lat: t.lat, lng: t.lng },
-                        map: map,
-                        icon: "/static/media/tracker.png",
-                        title: t.name
-                    });
-
-                    marker.addListener("click", () => {
-                        const html = `
-                            <div class="text-dark">
-                                <strong>${t.name}</strong><br>
-                                Latitude: ${t.lat}<br>
-                                Longitude: ${t.lng}
-                            </div>
-                        `.trim();
-
-                        infoWindow.setContent(html);
-                        infoWindow.open(map, marker);
-                    });
-
-                    trackerMarkers[key] = marker;
-                } else {
-                    // se já existe, só atualiza posição e título
-                    trackerMarkers[key].setPosition({ lat: t.lat, lng: t.lng });
-                    trackerMarkers[key].setTitle(t.name);
-                }
-            });
-        });
-}
-
 // tema escuro padrão: https://developers.google.com/maps/documentation/javascript/examples/style-array
 const nightmode = [
     { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
@@ -131,51 +85,63 @@ const nightmode = [
     }
 ]
 
-function initMap() {
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: -15.78, lng: -47.93 }, // inicialmente em Brasília
-        zoom: 5,
-        clickableIcons: false, // evita que ícones nativos sejam clicáveis
-        styles: nightmode
-    });
+window.MapApp = {
+    map: null,
+    trackerMarkers: {},
+    infoWindow: null,
+    initMap: function(){
+        this.map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: -15.78, lng: -47.93 },
+            zoom: 5,
+            clickableIcons: false,
+            styles: nightmode
+        });
 
-    // tenta centralizar o mapa no usuário
-    if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                const userPos = {
-                    lat: pos.coords.latitude,
-                    lng: pos.coords.longitude
-                };
+        this.infoWindow = new google.maps.InfoWindow();
 
-                map.setCenter(userPos);
-                map.setZoom(14);
+        // primeira carga
+        this.refreshTrackers();
 
-                new google.maps.Marker({
-                    position: userPos,
-                    map,
-                    icon: "/static/media/user.png"
+        // recarregar periodicamente
+        // setInterval(() => this.refreshTrackers(), 1000);
+    },
+    refreshTrackers: function(){
+        fetch("/trackers")
+            .then(r => r.json())
+            .then(trackers => {
+                trackers.forEach(t => {
+                    const key = t.name;
+                    if(!this.trackerMarkers[key]){
+                        const marker = new google.maps.Marker({
+                            position: { lat: t.lat, lng: t.lng },
+                            map: this.map,
+                            icon: "/static/media/tracker.png",
+                            title: t.name
+                        });
+
+                        marker.addListener("click", () => {
+                            const html = `
+                                <div class="text-dark">
+                                    <strong>${t.name}</strong><br>
+                                    Latitude: ${t.lat}<br>
+                                    Longitude: ${t.lng}
+                                </div>
+                            `;
+                            this.infoWindow.setContent(html);
+                            this.infoWindow.open(this.map, marker);
+                        });
+
+                        this.trackerMarkers[key] = marker;
+                    }else{
+                        this.trackerMarkers[key].setPosition({ lat: t.lat, lng: t.lng });
+                        this.trackerMarkers[key].setTitle(t.name);
+                    }
                 });
-            },
-            () => {
-                console.log("Não foi possível centralizar o mapa no usuário.");
-            }
-        );
+            });
     }
+};
 
-    infoWindow = new google.maps.InfoWindow();
-
-    // primeira carga imediata
-    refreshTrackers(map);
-
-    // recarrega a cada 1 segundo
-    //setInterval(() => refreshTrackers(map), 1000);
-
-    // (hack) observa o clique do usuário para retornar a latitude e longitude no ponto
-    map.addListener("click", (event) => {
-        const lat = event.latLng.lat();
-        const lng = event.latLng.lng();
-
-        console.log(`Latitude: ${lat}\nLongitude: ${lng}`);
-    });
+// callback do Google Maps
+function initMap(){
+    MapApp.initMap();
 }
