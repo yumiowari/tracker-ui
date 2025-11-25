@@ -29,12 +29,15 @@
             <div class="container shadow rounded w-100" id="map"></div>
 
             <form action="/logout" method="POST">
-                <button class="btn btn-outline-danger mt-4" action="submit">Sair</button>
+                <button class="btn btn-outline-danger my-4" action="submit">Sair</button>
             </form>
+
+            <ul class="list-group" id="tracker-list"></ul>
         </main>
 
         {% include "components/footer.html" %}
 
+        <script src="{{ url_for('static', filename='js/trackers.js') }}"></script>
         <script src="{{ url_for('static', filename='js/map.js') }}"></script>
         <script 
             src="https://maps.googleapis.com/maps/api/js?key={{ maps_key }}&callback=initMap"
