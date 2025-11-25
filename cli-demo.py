@@ -13,6 +13,7 @@ while True:
     print("5. Deletar rastreador")
     print("6. Listar rastreadores")
     print("7. Simular furto")
+    print("8. Simular notificação")
     print("\n0. Sair\n")
 
     op = input("Escolha: ").strip()
@@ -98,6 +99,15 @@ while True:
 
         except KeyboardInterrupt:
             print("\nSimulação encerrada.")
+
+    elif op == "8":
+        content = input("Texto da notificação: ").strip()
+
+        r = requests.post(f"{BASE}/notification/create", json={
+            "content": content
+        })
+
+        print(f"Resposta: {r.json()}")
 
     elif op == "0":
         break

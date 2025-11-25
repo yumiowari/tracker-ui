@@ -28,6 +28,14 @@ def init_db():
         );
         '''
     )
+    cur.execute(
+        '''
+        CREATE TABLE IF NOT EXISTS notification (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT NOT NULL
+        )
+        '''
+    )
     con.commit()
     con.close()
 
@@ -112,5 +120,39 @@ def list_trackers():
 
     return [
         {"name": row[0], "lat": row[1], "lng": row[2], "status": row[3]}
+        for row in rows
+    ]
+
+def create_notification(content):
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute('INSERT INTO notification (content) VALUES (?) RETURNING id', (content,))
+    row = cur.fetchone()
+    conn.commit()
+
+    conn.close()
+
+    if row is None:
+        return None
+    
+    return row[0]
+
+def remove_notification(id):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute("DELETE FROM notification WHERE id = ?", (id,))
+    con.commit()
+    
+    con.close()
+
+def list_notifications():
+    con = sqlite3.connect(DB_PATH)
+    cur = con.cursor()
+    cur.execute("SELECT id, content FROM notification")
+    rows = cur.fetchall()
+    con.close()
+
+    return [
+        {"id": row[0], "content": row[1]}
         for row in rows
     ]

@@ -6,6 +6,8 @@ from db import init_db
 from db import get_user, insert_user
 from db import insert_tracker, get_tracker_coords, update_tracker_coords, update_tracker_status, delete_tracker
 from db import list_trackers
+from db import create_notification, remove_notification
+from db import list_notifications
 
 app = Flask(__name__)
 
@@ -14,6 +16,8 @@ load_dotenv()
 app.secret_key = os.getenv('SECRET_KEY')
 
 init_db() # inicializa o banco de dados
+
+# /!\ to-do: revisar valores de retorno
 
 @app.route('/')
 def index():
@@ -107,12 +111,12 @@ def route_get_tracker_coords(name):
 def route_create_tracker():
     body = request.get_json()
 
+    if not body or not all(k in body for k in ('name', 'lat', 'lng')):
+        return {'error': 'Dados incompletos.'}, 400
+    
     name = body.get('name')
     lat = body.get('lat')
     lng = body.get('lng')
-
-    if not name or lat is None or lng is None:
-        return {'error': 'Dados incompletos.'}, 400
 
     insert_tracker(name, lat, lng)
 
@@ -133,7 +137,7 @@ def route_update_tracker_coords(name):
 def route_update_tracker_status(name):
     body = request.get_json()
 
-    if 'status' not in body:
+    if not body or 'status' not in body:
         return {'error': '"Status" deve ser informado.'}, 400
     
     update_tracker_status(name, body['status'])
@@ -149,6 +153,35 @@ def route_delete_tracker(name):
 @app.get('/tracker/list')
 def route_list_trackers():
     return list_trackers()
+
+@app.post('/notification/create')
+def route_create_notification():
+    body = request.get_json()
+
+    if not body or 'content' not in body:
+        return {'error': 'Dados incompletos.'}, 400
+    
+    content = body['content']
+    notification_id = create_notification(content)
+
+    if notification_id is None:
+        return {'error': 'Falha ao criar notificação.'}, 500
+
+    return {'id': notification_id}, 201
+
+@app.post('/notification/remove')
+def route_remove_notification():
+    body = request.get_json()
+
+    if not body or 'id' not in body:
+        return {'error': 'missing id'}, 400
+
+    remove_notification(body['id'])
+    return {'status': 'ok'}
+
+@app.get('/notification/list')
+def route_list_notifications():
+    return list_notifications()
 
 if __name__ == '__main__':
     app.run(debug=True)
