@@ -16,11 +16,79 @@
             .gm-ui-hover-effect > span {
                 filter: invert(1) brightness(2);
             }
+
+            /* Desktop: sino no canto superior direito */
+            #toggle-overlay {
+                position: fixed;
+                top: 0;
+                right: 0;
+
+                margin: 0.5em;
+
+                z-index: 9999;
+            }
+
+            /* Mobile: sino no canto inferior direito */
+            @media (max-width: 576px) {
+                #toggle-overlay {
+                    top: auto;
+                    bottom: 0;
+                }
+            }
+
+            #notification-overlay {
+                width: 300px;
+                height: 100vh;
+                z-index: 1000;
+                transform: translateX(100%);
+                transition: transform 0.3s;
+            }
         </style>
     </head>
 
     <body data-bs-theme="dark" class="d-flex flex-column min-vh-100 bg-dark text-light">
         <main class="container d-flex flex-column justify-content-center align-items-center min-vh-100 p-4">
+            <button class="btn btn-outline-light" id="toggle-overlay">
+                <i class="bi bi-bell-fill" id="toggle-icon"></i>
+            </button>
+
+            <div class="position-fixed top-0 end-0 bg-dark text-light shadow-lg" id="notification-overlay">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <h5 class="m-0">Notificações</h5>
+                </div>
+
+                <ul class="list-group list-group-flush" id="notifications">
+                    <!-- exemplos -->
+                    <li class="list-group-item bg-dark text-light">Rastreador X saiu da rota</li>
+                    <li class="list-group-item bg-dark text-light">Nova atualização disponível</li>
+                    <li class="list-group-item bg-dark text-light">Servidor reiniciado</li>
+                </ul>
+            </div>
+
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                const overlay = document.getElementById("notification-overlay");
+                const toggler = document.getElementById("toggle-overlay");
+                const icon = document.getElementById("toggle-icon");
+
+                let open = false;
+
+                toggler.addEventListener("click", () => {
+                    if(!open){
+                        overlay.style.transform = "translateX(0)";
+                        icon.classList.remove("bi-bell-fill");
+                        icon.classList.add("bi-bell-slash-fill");
+                    }else{
+                        overlay.style.transform = "translateX(100%)";
+                        icon.classList.remove("bi-bell-slash-fill");
+                        icon.classList.add("bi-bell-fill");
+                    }
+
+                    open = !open;
+                });
+            });
+            </script>
+            
             <h1 class="fw-bold mb-2">{{ title }}</h1>
             <h2 class="mb-4">Seja bem-vindo, {{ username }}!</h2>
 
@@ -44,5 +112,6 @@
             async defer
         ></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     </body>
 </html>

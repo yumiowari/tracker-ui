@@ -131,7 +131,7 @@ window.MapApp = {
         this.refreshTrackers();
 
         // recarregar periodicamente 
-        setInterval(() => this.refreshTrackers(), 1000);
+        //setInterval(() => this.refreshTrackers(), 1000);
         // /!\ REMOVA O COMENTÁRIO PARA FUNCIONALIDADE COMPLETA
 
         // Observa o clique do usuário para retornar a latitude e longitude no console
