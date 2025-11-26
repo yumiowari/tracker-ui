@@ -19,11 +19,23 @@ init_db() # inicializa o banco de dados
 
 # /!\ to-do: revisar valores de retorno
 
+@app.route('/landing_page')
+def landing_page():
+    if 'username' in session:
+        return redirect(url_for('index'))
+    
+    context = {
+        'title': 'ProtecTI',
+        'version': '0.0.0'
+    }
+    
+    return render_template('landing_page.html', **context)
+
 @app.route('/')
 def index():
     # verifica a sessão
     if 'username' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('landing_page'))
     
     context = {
         'title': 'ProtecTI',
